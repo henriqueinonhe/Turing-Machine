@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<meta charset="utf-8">
+	<title>Turing Machine</title>
+	<style type="text/css">
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: Roboto;
+			color: #333;
+		}
+
+		input, textarea, button {
+			display: block;
+			width: 100%;
+		}
+
+		textarea {
+			height: 200px;
+		}
+
+		input {
+			text-align: center;
+		}
+
+		button {
+			background-color: #9FDEEB;
+			border: solid #CCC 1px;
+			padding: 5px;
+			margin-top: 10px;
+		}
+
+		button:hover {
+			background-color: #D6F9FB;
+			transition: 0.4s;
+		}
+
+		p {
+			text-align: center;
+		}
+
+		#user-area {
+			position: fixed;
+			right: 0;
+			width: 30%;
+			padding: 10px;
+		}
+
+		#print-area {
+			width: 100%;
+			margin: auto;
+			text-align: center;
+		}
+
+		.tape {
+		}
+
+		.instruction {
+			margin-left: 20px;
+		}
+
+		.number {
+			margin-right: 20px;
+		}
+
+
+	</style>
+	<script
+  src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous"></script>
+	<script type="text/javascript" src="TM.js"></script>
+</head>
+<body>
+	<div id="user-area">
+		<p>Input</p>
+		<input type="text" id="data-input">
+		<p>Instructions</p>
+		<textarea id="instructions-input"></textarea>
+		<p>Initial Instruction Id</p>
+		<input type="text" id="initial-input">
+		<button id="set-button">Set!</button>
+		<button id="run-button">Run!</button>
+	</div>
+
+	<div id="print-area">
+		
+	</div>
+</body>
+</html>
