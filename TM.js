@@ -10,10 +10,10 @@ class Instruction
     {
         if(!validateInstruction(string))
         {
-            throw "Instruction '" + string + "' is not valid!";
+            throw `Instruction "${string}" is not valid!`;
         }
         
-        var instructionData = string.split(",");
+        const instructionData = string.split(",");
 
         this.instructionId = parseInt(instructionData[0]);
         this.condition = instructionData[1];
@@ -23,7 +23,7 @@ class Instruction
 
     toString()
     {
-        return "" + this.instructionId + "," + this.condition + "," + this.command + "," + this.nextInstructionId;
+        return `${this.instructionId},${this.condition},${this.command},${this.nextInstructionId}`;
     }
 }
 
@@ -73,7 +73,7 @@ class InstructionSet
     }
 }
 
-class Tape //Main Class
+class Tape
 {
     constructor(input)
     {
@@ -481,8 +481,6 @@ function printLine(logger)
 var machine;
 var logger;
 var lineCount = 1;
-
-//Gotta understand closures better
 
 function main()
 {
