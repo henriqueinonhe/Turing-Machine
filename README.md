@@ -1,4 +1,4 @@
-#Browser Turing Machine
+# Browser Turing Machine
 
 A pure JS implementation of a Turing Machine, particularly the one proposed by Walter Carnielli and Richard Epstein in ["Computable Functions, Logic, and the Foundations of Mathematics" ](https://www.amazon.com.br/Computability-Computable-Functions-Foundations-Mathematics/dp/098155072X/ref=dp_ob_title_bk) created as a study tool for me and my classmates in a graduate Computability course.
 
