@@ -1,14 +1,14 @@
-testCount = 0;
-passCount = 0;
-failCount = 0;
-TEST_ON = false;
-cellCount = 0;
-
 class Instruction
 {
+    static validateInstruction(instruction)
+    {
+        const regex = /^(\d+),(0|1),(0|1|L|R),(\d+)$/;
+        return regex.test(instruction);
+    }
+
     constructor(string)
     {
-        if(!validateInstruction(string))
+        if(!Instruction.validateInstruction(string))
         {
             throw `Instruction "${string}" is not valid!`;
         }
@@ -29,37 +29,45 @@ class Instruction
 
 class InstructionSet
 {
+    static splitInstructionSet(instructionSetString)
+    {
+        const rawInstructionStringList = instructionSetString.split("\n");
+        const instructionList = rawInstructionStringList.map(instruction => new Instruction(instruction));
+        return instructionList;
+    }
+
+    static validateInstructionList(instructionSet)
+    {
+        for(let index1 = 0; index1 < instructionSet.length; index1++)
+        {
+            for(let index2 = index1 + 1; index2 < instructionSet.length; index2++)
+            {
+                if(InstructionSet.instructionsCollide(instructionSet[index1], instructionSet[index2]))
+                {
+                    throw `Collision between instructions: "${instructionSet[index1].toString()}" and "${instructionSet[index2].toString()}" !`;
+                }
+            }
+        }
+    }
+
+    static instructionsCollide(instruction1, instruction2)
+    {
+        return instruction1.instructionId == instruction2.instructionId &&
+               instruction1.condition == instruction2.condition;
+    }
+
     constructor(instructionsString)
     {
-        let instructionList = splitInstructionSet(instructionsString);
-
-        try
-        {
-            validateInstructionSet(instructionList);
-        }
-        catch(collision)
-        {
-            throw `Collision between instructions: "${collision[0].toString()}" and "${collision[1].toString()}" !`;
-        }
+        const instructionList = InstructionSet.splitInstructionSet(instructionsString);
+        InstructionSet.validateInstructionList(instructionList);
 
         this.instructionList = instructionList;
     }
 
     findInstruction(id, condition)
     {
-        const result = this.instructionList.find(currentInstruction => id == currentInstruction.id &&
-                                                                       condition == currentInstruction.condition);
-
-        // for(let index = 0; index < this.instructionList.length; index++)
-        // {
-        //     if(id === this.instructionList[index].instructionId &&
-        //        condition === this.instructionList[index].condition)
-        //     {
-        //         return this.instructionList[index];
-        //     }
-        // }
-
-
+        const result = this.instructionList.find(currentInstruction =>  id === currentInstruction.instructionId &&
+                                                                        condition === currentInstruction.condition);
         return result !== undefined ? result : null;
     }
 
@@ -79,36 +87,46 @@ class InstructionSet
 
 class Tape
 {
+    static validateTapeInput(input)
+    {
+        var regex = /^( |(0|1)*)$/;
+        return regex.test(input);
+    }
+
+    static initializeTape(input, tape)
+    {   
+        if(input === "")
+        {
+            return;
+        }
+
+        let head = new Head(tape);
+        for(let index = 0; index < input.length - 1; index++)
+        {
+            head.write(input.charAt(index));
+            head.moveRight();
+        }
+        head.write(input.charAt(input.length - 1));
+    }
+
     constructor(input)
     {
-        this.root = new Cell(null, null);
+        this.cellCount = 1;
+        this.root = new Cell(null, null, 0);
 
-        if(input !== undefined && input !== "")
+        if(!Tape.validateTapeInput(input, this))
         {
-            if(!validateInput(input))
-            {
-                throw "This input: \"" + input + "\" is not valid!";
-            }
-
-            var head = new Head(this);
-
-            for(var index = 0; index < input.length - 1; index++)
-            {
-                head.write(input.charAt(index));
-                head.moveRight();
-            }
-            head.write(input.charAt(input.length - 1));
+            throw `This input: "${input}" is not valid!`;
         }
+        Tape.initializeTape(input, this);
     }
 
     print()
     {
-        var head = new Head(this);
-
+        const head = new Head(this);
         head.goToLeftEnd();
 
-        var string = "" + head.read();
-
+        let string = "" + head.read();
         while(!head.isAtRightEnd())
         {
             head.moveRight();
@@ -121,13 +139,12 @@ class Tape
 
 class Cell //Node
 {
-    constructor(left, right)
+    constructor(left, right, serialNumber)
     {
         this.symbol = "0";
         this.left = left;
         this.right = right;
-        this.serialNumber = cellCount;
-        cellCount++;
+        this.serialNumber = serialNumber;
     }
 }
 
@@ -168,7 +185,8 @@ class Head //Iterator
     {
         if(this.isAtLeftEnd())
         {
-            this.currentCell.left = new Cell(null, this.currentCell);
+            this.currentCell.left = new Cell(null, this.currentCell, this.tape.cellCount);
+            this.tape.cellCount++;
         }
 
         this.currentCell = this.currentCell.left;
@@ -178,7 +196,8 @@ class Head //Iterator
     {
         if(this.isAtRightEnd())
         {
-            this.currentCell.right = new Cell(this.currentCell, null);
+            this.currentCell.right = new Cell(this.currentCell, null, this.tape.cellCount);
+            this.tape.cellCount++;
         }
 
         this.currentCell = this.currentCell.right;
@@ -324,299 +343,3 @@ class Logger
     }
 }
 
-$(document).ready(main);
-
-function validateInput(input)
-{
-    var regex = /^(0|1)*$/;
-    return regex.test(input);
-}
-
-function validateInstruction(instruction)
-{
-    var regex = /^(\d+),(0|1),(0|1|L|R),(\d+)$/;
-    return regex.test(instruction);
-}
-
-function splitInstructionSet(instructionSetString)
-{
-    var rawInstructionsList = instructionSetString.split("\n");
-    var instructionSet = [];
-
-    for(var index = 0; index < rawInstructionsList.length; index++)
-    {
-        instructionSet.push(new Instruction(rawInstructionsList[index]));
-    }
-
-    return instructionSet;
-}
-
-function instructionsCollide(instruction1, instruction2)
-{
-    return instruction1.instructionId == instruction2.instructionId &&
-           instruction1.condition == instruction2.condition;
-}
-
-function validateInstructionSet(instructionSet)
-{
-    for(index1 = 0; index1 < instructionSet.length; index1++)
-    {
-        for(index2 = index1 + 1; index2 < instructionSet.length; index2++)
-        {
-            if(instructionsCollide(instructionSet[index1], instructionSet[index2]))
-            {
-                throw [instructionSet[index1], instructionSet[index2]];
-            }
-        }
-    }
-}
-
-function cleanPrintArea()
-{
-    $("#print-area").html("");
-    lineCount = 0;
-}
-
-function setButtonClick()
-{
-    var input = $("#data-input").val();
-    var instructions = $("#instructions-input").val();
-    var initialInstructionId = parseInt($("#initial-input").val());
-    var logger = new Logger();
-
-    try
-    {
-        machine = new Machine(input, instructions, initialInstructionId, logger);
-    }
-    catch(err)
-    {
-        alert(err);
-    }
-
-    cleanPrintArea();
-}
-
-function printLine(logger)
-{
-    logger = machine.logger;
-    //FIXME!
-    var html = "";
-    var tape = logger.lastEntry().tape;
-    var currentInstruction = logger.lastEntry().currentInstruction;
-    var headIndex = logger.lastEntry().headIndex;
-
-    html += "<div>"
-    html += "<span class='number'>" + lineCount + ".</span>";
-
-    for(var i = 0; i < tape.length; i++)
-    {
-        id = "" + lineCount + "_" + (i + 1);
-        html += "<span class='tape' " + "id='" + id + "'>" + tape.charAt(i) + "</span>";
-    }
-
-    html += "<span class='instruction'>" + currentInstruction + "</span>";
-    html += "</div>"
-
-    $("#print-area").append(html);    
-
-    var id = "#" + lineCount + "_" + (headIndex + 1);
-    $(id).css("background-color", "yellow");
-
-    lineCount++;
-
-}
-
-
-//FIXME!
-var machine;
-var logger;
-var lineCount = 1;
-
-function main()
-{
-    /* Run Tests */
-    TEST();
-    
-    //Program
-    $("#set-button").click(setButtonClick);
-    $("#run-button").click(function ()
-    {
-        try
-        {
-            if(machine.status === "running")
-            {
-                machine.run();
-                printLine(logger);
-            }
-            else if(machine.status === "halted")
-            {
-                throw "Machine is halted!";
-            }
-        }
-        catch(err)
-        {
-            alert(err);
-        }
-    });
-
-
-}
-
-
-function TEST()
-{
-    if(TEST_ON)
-    
-    {
-        //Validate Input
-        CHECK('validateInput("")');
-        CHECK('validateInput("1001")');
-        CHECK('validateInput("1101")');
-        CHECK('validateInput("1111")');
-
-        CHECK('!validateInput("1001a")');
-        CHECK('!validateInput("100231")');
-        CHECK('!validateInput("1001 ")');
-
-        //Validate Instruction
-        CHECK('validateInstruction("1,0,L,232")');
-        CHECK('validateInstruction("234,1,R,232")');
-        CHECK('validateInstruction("123123123,0,0,232")');
-        CHECK('validateInstruction("1,1,1,34")');
-
-        CHECK('!validateInstruction("1,,1,232")');
-        CHECK('!validateInstruction("-1,0,L,232")');
-        CHECK('!validateInstruction("d,0,L,232")');
-        CHECK('!validateInstruction("1,R,L,232")');
-
-        //Instruction Creation
-        CHECK_NOTHROW('new Instruction("1,0,L,232")');
-        CHECK_NOTHROW('new Instruction("234,1,R,232")');
-        CHECK_NOTHROW('new Instruction("123123123,0,0,232")');
-        CHECK_NOTHROW('new Instruction("1,1,1,34")');
-
-        CHECK_THROWS('new Instruction("1,,1,232")');
-        CHECK_THROWS('new Instruction("-1,0,L,232")');
-        CHECK_THROWS('new Instruction("d,0,L,232")');
-        CHECK_THROWS('new Instruction("1,R,L,232")');
-
-        //Instruction toString
-        CHECK('(new Instruction("1,0,L,232")).toString() === "1,0,L,232"');
-        CHECK('(new Instruction("234,1,R,232")).toString() === "234,1,R,232"');
-        CHECK('(new Instruction("123123123,0,0,232")).toString() === "123123123,0,0,232"');
-        CHECK('(new Instruction("1,1,1,34")).toString() === "1,1,1,34"');
-
-        //Instruction Set Splitting
-        CHECK_NOTHROW('splitInstructionSet("1,0,L,1\n1,1,R,2\n2,0,0,2")');
-
-        testInstructionList = splitInstructionSet("1,0,L,1\n1,1,R,2\n2,0,0,2");
-        CHECK('testInstructionList.length === 3');
-
-        testInstruction1 = testInstructionList[0];
-        testInstruction2 = testInstructionList[1];
-        testInstruction3 = testInstructionList[2];
-
-        CHECK('testInstruction1.instructionId === 1');
-        CHECK('testInstruction1.condition === "0"');
-        CHECK('testInstruction1.command === "L"');
-        CHECK('testInstruction1.nextInstructionId === 1');
-
-        CHECK('testInstruction2.instructionId === 1');
-        CHECK('testInstruction2.condition === "1"');
-        CHECK('testInstruction2.command === "R"');
-        CHECK('testInstruction2.nextInstructionId === 2');
-
-        CHECK('testInstruction3.instructionId === 2');
-        CHECK('testInstruction3.condition === "0"');
-        CHECK('testInstruction3.command === "0"');
-        CHECK('testInstruction3.nextInstructionId === 2');
-
-        //Instruction Set
-        CHECK_NOTHROW('new InstructionSet("1,0,L,1\n1,1,R,2\n2,0,0,2")');
-        CHECK_THROWS('new InstructionSet("1,0,L,1\n1,1,R,2\n1,0,0,2")');
-
-        testInstructionSet = new InstructionSet("1,0,L,1\n1,1,R,2\n2,0,0,2");
-        testInstructionFound = testInstructionSet.findInstruction(1,"0");
-
-        CHECK('testInstructionFound.instructionId === 1');
-        CHECK('testInstructionFound.condition === "0"');
-        CHECK('testInstructionFound.command === "L"');
-
-        //Tape
-        testTape = new Tape;
-        CHECK('testTape.root.symbol === "0"');
-        CHECK('testTape.root.left === null');
-        CHECK('testTape.root.right === null');
-
-        //Cells & Head
-        testHead = new Head(testTape);
-
-        CHECK('testHead.read() === "0"');
-        CHECK('testHead.isAtLeftEnd()');
-        CHECK('testHead.isAtRightEnd()');
-
-        testHead.moveLeft();
-
-        CHECK('testHead.read() === "0"');
-        CHECK('testHead.isAtLeftEnd()');
-        CHECK('!testHead.isAtRightEnd()');
-
-        testHead.write("1");
-
-        CHECK('testHead.read() === "1"');
-        CHECK('testHead.isAtLeftEnd()');
-        CHECK('!testHead.isAtRightEnd()');
-
-        testHead.moveRight();
-
-        CHECK('testHead.read() === "0"');
-        CHECK('!testHead.isAtLeftEnd()');
-        CHECK('testHead.isAtRightEnd()');
-
-        testHead.moveRight();
-        testHead.write("1");
-        testHead.moveRight();
-        testHead.moveRight();
-
-        CHECK('testTape.print() === "10100"');
-
-        //Tape 2
-        testTape2 = new Tape("011011");
-        CHECK('testTape2.print() === "011011"');
-
-        //Machine
-        testLogger = new Logger();
-        testMachine = new Machine("1", "1,1,R,1\n1,0,1,1", 1, testLogger);
-
-        CHECK('testMachine.printTape() === "1"');
-        CHECK('testMachine.headCurrentIndex() == 0');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "10"');
-        CHECK('testMachine.headCurrentIndex() == 1');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "11"');
-        CHECK('testMachine.headCurrentIndex() == 1');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "110"');
-        CHECK('testMachine.headCurrentIndex() == 2');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "111"');
-        CHECK('testMachine.headCurrentIndex() == 2');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "1110"');
-        CHECK('testMachine.headCurrentIndex() == 3');
-        testMachine.run();
-        CHECK('testMachine.printTape() === "1111"');
-        CHECK('testMachine.headCurrentIndex() == 3');
-
-        //Logger
-        console.log(testLogger);
-        for(var i = 0; i < testLogger.logger.length; i++)
-        {
-            console.log(testLogger.logger[i].tape, testLogger.logger[i].printCurrentInstruction(), testLogger.logger[i].headIndex);
-        }
-
-        //Test Summary
-        console.log("Tests: " + testCount + " Pass: " + passCount + " Fail: " + failCount);
-    }
-}

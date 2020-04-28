@@ -4,9 +4,9 @@ katchFailCount = 0;
 
 function RUN_KATCH(testSuite)
 {
-    console.time("Katch Timer");
+    console.time("Katch - Tests Elapsed Time");
     testSuite();
-    console.timeEnd("Katch Timer");
+    console.timeEnd("Katch - Tests Elapsed Time");
     console.log("Tests Summary: " + katchTestCount + " Pass: " + katchPassCount + " Fail: " + katchFailCount);
 }
 
@@ -28,17 +28,24 @@ function CHECK(lhs, rhs)
     
     katchTestCount++;
 
-    const testPass = eval(lhs + " === " + rhs);
-
-    if(testPass)
+    try
     {
-        katchPassCount++;
+        const testPass = eval(lhs + " === " + rhs);
+        if(testPass)
+        {
+            katchPassCount++;
+        }
+        else
+        {
+            katchFailCount++;
+            console.log(`Test number ${katchTestCount}, "CHECK(${lhs}, ${rhs}")" FAILED!
+                         Failed with: "${eval(lhs)} === ${eval(rhs)}"`);
+        }
     }
-    else
+    catch(err)
     {
-        katchFailCount++;
-        console.log(`Test number ${katchTestCount}, "CHECK(${lhs}, ${rhs}")" FAILED!\n
-                     Failed with: "${eval(lhs)} === ${eval(rhs)}"`);
+        console.log(`Test number ${katchTestCount}, "CHECK(${lhs}, ${rhs}")" has thrown an exception!
+                     Thrown with: "${err}"`);
     }
 }
 

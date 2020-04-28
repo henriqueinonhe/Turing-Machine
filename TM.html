@@ -3,6 +3,7 @@
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	<meta charset="utf-8">
+	<script type="text/javascript" src="TM.js"></script>
 	<title>Turing Machine</title>
 	<style type="text/css">
 
@@ -73,7 +74,6 @@
   src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
   integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
   crossorigin="anonymous"></script>
-	<script type="text/javascript" src="TM.js"></script>
 </head>
 <body>
 	<div id="user-area">
@@ -91,4 +91,97 @@
 		
 	</div>
 </body>
+<script type="text/javascript">
+	
+function cleanPrintArea()
+{
+    $("#print-area").html("");
+    lineCount = 0;
+}
+
+function setButtonClick()
+{
+    var input = $("#data-input").val();
+    var instructions = $("#instructions-input").val();
+    var initialInstructionId = parseInt($("#initial-input").val());
+    var logger = new Logger();
+
+    try
+    {
+        machine = new Machine(input, instructions, initialInstructionId, logger);
+    }
+    catch(err)
+    {
+        alert(err);
+    }
+
+    cleanPrintArea();
+}
+
+function printLine(logger)
+{
+    logger = machine.logger;
+    //FIXME!
+    var html = "";
+    var tape = logger.lastEntry().tape;
+    var currentInstruction = logger.lastEntry().currentInstruction;
+    var headIndex = logger.lastEntry().headIndex;
+
+    html += "<div>"
+    html += "<span class='number'>" + lineCount + ".</span>";
+
+    for(var i = 0; i < tape.length; i++)
+    {
+        id = "" + lineCount + "_" + (i + 1);
+        html += "<span class='tape' " + "id='" + id + "'>" + tape.charAt(i) + "</span>";
+    }
+
+    html += "<span class='instruction'>" + currentInstruction + "</span>";
+    html += "</div>"
+
+    $("#print-area").append(html);    
+
+    var id = "#" + lineCount + "_" + (headIndex + 1);
+    $(id).css("background-color", "yellow");
+
+    lineCount++;
+
+}
+
+//FIXME!
+var machine;
+var logger;
+var lineCount = 1;
+
+function main()
+{
+    /* Run Tests */
+    TEST();
+    
+    //Program
+    $("#set-button").click(setButtonClick);
+    $("#run-button").click(function ()
+    {
+        try
+        {
+            if(machine.status === "running")
+            {
+                machine.run();
+                printLine(logger);
+            }
+            else if(machine.status === "halted")
+            {
+                throw "Machine is halted!";
+            }
+        }
+        catch(err)
+        {
+            alert(err);
+        }
+    });
+
+
+}
+
+</script>
 </html>
