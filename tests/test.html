@@ -2,8 +2,8 @@
 <html>
 <head>
 	<title>TM - Tests</title>
-	<script type="text/javascript" src="katchjs.js"></script>
-	<script type="text/javascript" src="TM.js"></script>
+	<script type="text/javascript" src="../katchjs.js"></script>
+	<script type="text/javascript" src="../TM.js"></script>
 </head>
 <body>
 
@@ -130,8 +130,7 @@ function testSuite()
 	CHECK(`testTape2.print()`, `"011011"`);
 
 	//Machine
-	testLogger = new Logger();
-	testMachine = new Machine("1", "1,1,R,1\n1,0,1,1", 1, testLogger);
+	testMachine = new Machine("1", "1,1,R,1\n1,0,1,1", 1);
 
 	CHECK(`testMachine.printTape()`, `"1"`);
 	CHECK(`testMachine.headCurrentIndex() == 0`);

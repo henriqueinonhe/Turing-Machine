@@ -338,7 +338,7 @@ class Logger
     	const currentInstruction = machine.currentInstruction;
     	const headCurrentIndex = machine.headCurrentIndex();
     	const newLogEntry = new LogEntry(currentTapeState, currentInstruction, headCurrentIndex);
-        this.logger.push();
+        this.logger.push(newLogEntry);
     }
 
     lastEntry()

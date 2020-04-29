@@ -15,6 +15,10 @@
 			color: #333;
 		}
 
+		body {
+			padding-bottom: 500px;
+		}
+
 		input, textarea, button {
 			display: block;
 			width: 100%;
@@ -68,6 +72,10 @@
 			margin-right: 20px;
 		}
 
+		#examples {
+			margin-top: 20px;
+		}
+
 
 	</style>
 	<script
@@ -85,6 +93,14 @@
 		<input type="text" id="initial-input">
 		<button id="set-button">Set!</button>
 		<button id="run-button">Run!</button>
+		<div id="examples">
+			<p>Examples</p>
+			<button id="go-right-button">Go Right</button>
+			<button id="go-left-button">Go Left</button>
+			<button id="write-one-button">Write One</button>
+			<button id="alternate-one-and-zero-button">Alternate One and Zero</button>
+			<button id="sum-button">Sum</button>
+		</div>
 	</div>
 
 	<div id="print-area">
@@ -124,7 +140,6 @@ function setMachine()
 function printLine()
 {
     const logger = machine.logger;
-    console.log(logger);
     let html = "";
     const tape = logger.lastEntry().tape;
     const currentInstruction = logger.lastEntry().currentInstruction;
@@ -135,8 +150,7 @@ function printLine()
 
     for(let i = 0; i < tape.length; i++)
     {
-        id = `${lineCount}_${i + 1}`;
-        html += `<span class='tape' id='${id}'>${tape.charAt(i)}</span>`;
+        html += `<span class='tape' id='line${lineCount}_${i + 1}'>${tape.charAt(i)}</span>`;
     }
 
     html += `<span class='instruction'>${currentInstruction}</span>
@@ -144,10 +158,39 @@ function printLine()
 
     document.querySelector("#print-area").innerHTML += html;
 
-    const id = `#${lineCount}_${headIndex + 1}`;
+    const id = `#line${lineCount}_${headIndex + 1}`;
     document.querySelector(id).style.backgroundColor = "yellow";
     lineCount++;
 }
+
+function setExample({input, instructions, initialInstruction})
+{
+	console.log(input);
+	document.querySelector("#data-input").value = input;
+    document.querySelector("#instructions-input").value = instructions;
+    document.querySelector("#initial-input").value = initialInstruction;
+}
+
+//Examples Data
+const goRightData = {input : "0",
+					 instructions : "0,0,R,0",
+					 initialInstruction: "0"};
+
+const goLeftData = {input : "0",
+					instructions : "0,0,L,0",
+					initialInstruction: "0"};
+
+const writeOneData = {input : "0",
+					  instructions : "0,0,1,0\n0,1,R,0",
+					  initialInstruction: "0"};
+
+const alternateOneAndZeroData = {input : "0",
+					             instructions : "0,0,1,0\n0,1,R,1\n1,0,R,0",
+					             initialInstruction: "0"};
+
+const sumData = {input : "11111011",
+                 instructions : `0,1,R,0\n0,0,R,1\n1,1,0,2\n1,0,0,999\n2,0,L,3\n3,0,1,4\n4,1,L,4\n4,0,R,0`,
+                 initialInstruction: "0"};
 
 function main()
 {
@@ -176,8 +219,21 @@ function main()
         }
     });
 
+   	//Examples
+   	const goRightButton = document.querySelector("#go-right-button");
+   	const goLeftButton = document.querySelector("#go-left-button");
+   	const writeOneButton = document.querySelector("#write-one-button");
+   	const alternateOneAndZeroButton = document.querySelector("#alternate-one-and-zero-button");
+   	const sumButton = document.querySelector("#sum-button");
 
+   	goRightButton.addEventListener("click", () => {setExample(goRightData);});
+   	goLeftButton.addEventListener("click", () => {setExample(goLeftData);});
+   	writeOneButton.addEventListener("click", () => {setExample(writeOneData);});
+   	alternateOneAndZeroButton.addEventListener("click", () => {setExample(alternateOneAndZeroData);});
+   	sumButton.addEventListener("click", () => {setExample(sumData);});
 }
+
+
 
 </script>
 </html>
