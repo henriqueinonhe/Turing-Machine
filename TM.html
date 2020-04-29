@@ -92,23 +92,26 @@
 	</div>
 </body>
 <script type="text/javascript">
-	
+let machine;
+let lineCount = 1;
+
+document.addEventListener("DOMContentLoaded", main);
+
 function cleanPrintArea()
 {
-    $("#print-area").html("");
+    document.querySelector("#print-area").innerHTML = "";
     lineCount = 0;
 }
 
-function setButtonClick()
+function setMachine()
 {
-    var input = $("#data-input").val();
-    var instructions = $("#instructions-input").val();
-    var initialInstructionId = parseInt($("#initial-input").val());
-    var logger = new Logger();
+    const input = document.querySelector("#data-input").value;
+    const instructions = document.querySelector("#instructions-input").value;
+    const initialInstructionId = parseInt(document.querySelector("#initial-input").value);
 
     try
     {
-        machine = new Machine(input, instructions, initialInstructionId, logger);
+        machine = new Machine(input, instructions, initialInstructionId);
     }
     catch(err)
     {
@@ -118,56 +121,48 @@ function setButtonClick()
     cleanPrintArea();
 }
 
-function printLine(logger)
+function printLine()
 {
-    logger = machine.logger;
-    //FIXME!
-    var html = "";
-    var tape = logger.lastEntry().tape;
-    var currentInstruction = logger.lastEntry().currentInstruction;
-    var headIndex = logger.lastEntry().headIndex;
+    const logger = machine.logger;
+    console.log(logger);
+    let html = "";
+    const tape = logger.lastEntry().tape;
+    const currentInstruction = logger.lastEntry().currentInstruction;
+    const headIndex = logger.lastEntry().headIndex;
 
-    html += "<div>"
-    html += "<span class='number'>" + lineCount + ".</span>";
+    html = `<div>
+    		<span class='number'>${lineCount}.</span>`;
 
-    for(var i = 0; i < tape.length; i++)
+    for(let i = 0; i < tape.length; i++)
     {
-        id = "" + lineCount + "_" + (i + 1);
-        html += "<span class='tape' " + "id='" + id + "'>" + tape.charAt(i) + "</span>";
+        id = `${lineCount}_${i + 1}`;
+        html += `<span class='tape' id='${id}'>${tape.charAt(i)}</span>`;
     }
 
-    html += "<span class='instruction'>" + currentInstruction + "</span>";
-    html += "</div>"
+    html += `<span class='instruction'>${currentInstruction}</span>
+     		 <div>`;
 
-    $("#print-area").append(html);    
+    document.querySelector("#print-area").innerHTML += html;
 
-    var id = "#" + lineCount + "_" + (headIndex + 1);
-    $(id).css("background-color", "yellow");
-
+    const id = `#${lineCount}_${headIndex + 1}`;
+    document.querySelector(id).style.backgroundColor = "yellow";
     lineCount++;
-
 }
-
-//FIXME!
-var machine;
-var logger;
-var lineCount = 1;
 
 function main()
 {
-    /* Run Tests */
-    TEST();
-    
     //Program
-    $("#set-button").click(setButtonClick);
-    $("#run-button").click(function ()
+    const setButton = document.querySelector("#set-button");
+    const runButton = document.querySelector("#run-button");
+    setButton.addEventListener("click", setMachine);
+   	runButton.addEventListener("click", function ()
     {
         try
         {
             if(machine.status === "running")
             {
                 machine.run();
-                printLine(logger);
+                printLine(machine.logger);
             }
             else if(machine.status === "halted")
             {
@@ -176,6 +171,7 @@ function main()
         }
         catch(err)
         {
+        	console.log(err);
             alert(err);
         }
     });

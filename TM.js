@@ -219,9 +219,9 @@ class Head //Iterator
 
 class Machine
 {
-    constructor(input, instructions, initialInstructionId, logger)
+    constructor(input, instructions, initialInstructionId)
     {
-        this.logger = logger;
+        this.logger = new Logger();
         this.tape = new Tape(input);
         this.head = new Head(this.tape);
         this.instructionSet = new InstructionSet(instructions);
@@ -329,12 +329,16 @@ class Logger
 {
     constructor()
     {
-        this.logger = new Array();
+        this.logger = [];
     }
 
     log(machine)
     {
-        this.logger.push(new LogEntry(machine.tape.print(), machine.currentInstruction, machine.headCurrentIndex()));
+    	const currentTapeState = machine.tape.print();
+    	const currentInstruction = machine.currentInstruction;
+    	const headCurrentIndex = machine.headCurrentIndex();
+    	const newLogEntry = new LogEntry(currentTapeState, currentInstruction, headCurrentIndex);
+        this.logger.push();
     }
 
     lastEntry()
